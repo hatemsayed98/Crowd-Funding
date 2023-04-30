@@ -1,4 +1,3 @@
-from Project import Project
 from FileIO import FileIO
 
 
@@ -24,15 +23,15 @@ class User:
             if p.title == myproject.title:
                 raise Exception("Project Already exists!")
         self.projects.append(myproject)
-        FileIO.save_projects(self.projects)
+        FileIO.save_projects(self.projects, self.email)
 
-    def edit_project(self, ptitle, project):
+    def edit_project(self, oldTitle, project):# old => iti   project.title =>>> alx
         for p in self.projects:
-            if p.title == ptitle:
+            if p.title == oldTitle:
                 self.projects.remove(p)
                 self.projects.append(project)
                 break
-        FileIO.save_projects(self.projects)
+        FileIO.save_projects(self.projects, self.email)
 
     def delete_project(self, ptitle):
         for p in self.projects:
@@ -41,5 +40,10 @@ class User:
                 FileIO.save_projects(self.projects, self.email)
                 break
 
-    def search_project(self, project):
-        pass
+    @staticmethod
+    def fund_project(project):
+        projects = FileIO.load_projects(project.email)
+        for p in projects:
+            if p.email == project.email:
+                p.target = project.target
+        FileIO.save_projects(projects, project.email)

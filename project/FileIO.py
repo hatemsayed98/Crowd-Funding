@@ -20,7 +20,8 @@ class FileIO:
                     file.write(f"{p.email};{p.title};{p.details};"
                                f"{p.target};{p.end_date};{p.start_date}\n")
         else:
-            os.remove(filepath)
+            file = open(filepath, 'w')
+            file.close()
 
     @staticmethod
     def load_projects(email):

@@ -4,7 +4,8 @@ from Authentication import Authentication
 from datetime import date
 
 
-def inputProject(msg):
+# format date
+def inputDate(msg):
     d, m, y = [int(x) for x in input(msg).split('/')]
     b = date(y, m, d)
     return b
@@ -14,7 +15,8 @@ if __name__ == '__main__':
 
     # Login with the auth class
     auth = None
-    while auth is None:
+    # While not logged in
+    while True:
         choice = str(input("1- Register\n2- Login\n3- Exit\n"))
         if choice == '3':
             break
@@ -36,12 +38,11 @@ if __name__ == '__main__':
                 continue
             # Logged in user action
             user_choice = '0'
-            while user_choice != '6':
+            while user_choice != '7':
                 user_choice = str(input("1- Create a project\n2- View my projects\n3- View all projects\n"
-                                        "4- Edit your project\n5- Delete your project\n6- Logout\n"))
+                                        "4- Edit your project\n5- Delete your project\n6- Fund project\n7- Logout\n"))
                 # Add project
                 if user_choice == '1':
-
                     title = input("Enter title: ")
                     while len(title) < 1 or not title.isalpha():
                         title = input("Enter title: ")
@@ -53,8 +54,8 @@ if __name__ == '__main__':
                     start_date, end_date = '', ''
                     while True:
                         try:
-                            start_date = inputProject("Enter start date person's date(DD/MM/YYYY) : ")
-                            end_date = inputProject("Enter End date person's date(DD/MM/YYYY) : ")
+                            start_date = inputDate("Enter start date person's date(DD/MM/YYYY) : ")
+                            end_date = inputDate("Enter End date person's date(DD/MM/YYYY) : ")
                             if start_date >= end_date:
                                 raise Exception("End date must be before start date")
                             break
@@ -81,6 +82,7 @@ if __name__ == '__main__':
                 # Edit my project
                 if user_choice == '4':
                     projects = auth.get_my_projects()
+                    # If User has no project
                     if len(projects) < 1:
                         print('No projects to edit!\n')
                         continue
@@ -109,10 +111,10 @@ if __name__ == '__main__':
                                 start_date, end_date = '', ''
                                 while True:
                                     try:
-                                        start_date = inputProject(f"Start date {old_project.start_date} start date "
-                                                                  f"date(DD/MM/YYYY):")
-                                        end_date = inputProject(f"End date {old_project.end_date} End date "
-                                                                f"date(DD/MM/YYYY):")
+                                        start_date = inputDate(f"Start date {old_project.start_date} start date "
+                                                               f"date(DD/MM/YYYY):")
+                                        end_date = inputDate(f"End date {old_project.end_date} End date "
+                                                             f"date(DD/MM/YYYY):")
                                         if start_date >= end_date:
                                             raise Exception("End date must be before start date")
                                         break
@@ -125,6 +127,7 @@ if __name__ == '__main__':
                                 auth.edit_project(old_project.title, project)
 
                                 break
+
                         except Exception as e:
                             print(e)
                             continue
@@ -134,28 +137,57 @@ if __name__ == '__main__':
                     if len(projects) < 1:
                         print('No projects to delete!\n')
                         continue
-                    deleted = False
-                    while not deleted:
+
+                    while True:
                         for i in range(0, len(projects)):
                             print(f"{i + 1}{projects[i]}")
                         try:
                             projectIndex = int(input(f'0- Exit\nChoose projects 1 : {len(projects)}  '))
                             if projectIndex == 0:
-                                deleted = True
+                                break
 
                             projectIndex -= 1
                             if projectIndex in range(0, len(projects)):
                                 old_project = projects[projectIndex]
                                 auth.delete_project(old_project.title)
-                                deleted = True
+                                break
+
+                        except Exception as e:
+                            print(e)
+                            continue
+                # Fund a project
+                if user_choice == '6':
+                    projects = User.get_all_projects()
+                    while True:
+                        for i in range(0, len(projects)):
+                            print(f"{i + 1}{projects[i]}")
+                        try:
+                            projectIndex = int(input(f'0- Exit\nChoose projects 1 : {len(projects)}  '))
+                            if projectIndex == 0:
+                                break
+                            projectIndex -= 1
+
+                            if projectIndex in range(0, len(projects)):
+                                fund = int(input("How much do you want to fund"))
+                                if fund < 0:
+                                    raise Exception("Fund can not be a negative number")
+                                target = int(projects[projectIndex].target)
+                                if fund > target:
+                                    raise Exception("Fund is greater than target")
+
+                                target -= fund
+                                projects[projectIndex].target = target
+                                User.fund_project(projects[projectIndex])
+
+                                break
 
                         except Exception as e:
                             print(e)
                             continue
 
-                if user_choice == '6':
+                if user_choice == '7':
                     auth = None
-                    continue
+                    break
                 else:
                     continue
         else:
